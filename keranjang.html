@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keranjang — Bakmi Ayam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --bg2: #F2EDE6;
+      --card: #FFFFFF;
+      --nav: #FFFFFF;
+      --text: #1A1007;
+      --sub: #6B5B4E;
+      --accent: #C62828;
+      --gold: #E8A000;
+      --green: #2E7D32;
+      --border: rgba(200,170,130,0.25);
+      --shadow: rgba(80,40,10,0.10);
+    }
+    .dark {
+      --bg: #100B07;
+      --bg2: #1A120A;
+      --card: #1E1610;
+      --nav: #1E1610;
+      --text: #F5ECD8;
+      --sub: #B09080;
+      --border: rgba(200,150,80,0.15);
+      --shadow: rgba(0,0,0,0.35);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Poppins',sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 18px 40px;
+      background: var(--nav);
+      box-shadow: 0 2px 20px var(--shadow);
+      position: sticky; top:0; z-index:100;
+      border-bottom: 2px solid var(--gold);
+      transition: background 0.3s;
+    }
+    nav h1 {
+      font-family:'Playfair Display',serif;
+      font-size:22px; font-weight:900;
+      color: var(--accent); cursor:pointer;
+    }
+    nav ul { display:flex; gap:28px; list-style:none; }
+    nav ul li {
+      font-size:14px; font-weight:500; color:var(--sub);
+      cursor:pointer; padding:4px 0; position:relative;
+      transition: color 0.2s;
+    }
+    nav ul li::after {
+      content:''; position:absolute; bottom:-2px; left:0;
+      width:0; height:2px; background:var(--gold);
+      transition: width 0.25s;
+    }
+    nav ul li:hover { color:var(--accent); }
+    nav ul li:hover::after { width:100%; }
+    nav ul li.active { color:var(--accent); }
+    nav ul li.active::after { width:100%; }
+    .nav-right { display:flex; align-items:center; gap:8px; }
+    .toggle {
+      cursor:pointer; padding:7px 13px; border-radius:8px;
+      background:var(--bg2); font-size:15px;
+      border:1px solid var(--border);
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+      padding: 40px 40px 30px; text-align:center;
+      border-bottom: 1px solid var(--border);
+      position:relative; overflow:hidden;
+    }
+    .page-header::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse at 50% 60%, rgba(232,160,0,0.07) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .page-header .label {
+      font-size:11px; letter-spacing:3px; text-transform:uppercase;
+      color:var(--gold); font-weight:600; margin-bottom:8px; display:block;
+    }
+    .page-header h2 {
+      font-family:'Playfair Display',serif;
+      font-size:36px; font-weight:900; color:var(--text); margin-bottom:8px;
+    }
+    .page-header p { color:var(--sub); font-size:13px; }
+    .divider {
+      width:60px; height:3px;
+      background:linear-gradient(90deg,var(--gold),var(--accent));
+      border-radius:3px; margin:14px auto 0;
+    }
+
+    /* LAYOUT */
+    .container {
+      max-width:1100px; margin:0 auto;
+      padding: 36px 40px 60px;
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-family:'Playfair Display',serif;
+      font-size:20px; font-weight:700; color:var(--text);
+      margin-bottom:18px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .section-title span {
+      font-family:'Poppins',sans-serif;
+      font-size:12px; font-weight:600;
+      background:var(--accent); color:#fff;
+      padding:2px 10px; border-radius:20px;
+    }
+
+    /* CART ITEMS */
+    .cart-box {
+      background:var(--card);
+      border-radius:20px;
+      border:1px solid var(--border);
+      box-shadow:0 4px 24px var(--shadow);
+      overflow:hidden;
+    }
+    .cart-empty {
+      padding:60px 20px; text-align:center; color:var(--sub);
+    }
+    .cart-empty .icon { font-size:52px; margin-bottom:12px; }
+    .cart-empty p { font-size:14px; margin-bottom:18px; }
+    .cart-empty a {
+      display:inline-block; padding:10px 24px;
+      background:var(--accent); color:#fff;
+      border-radius:10px; font-size:13px; font-weight:600;
+      text-decoration:none; cursor:pointer;
+    }
+
+    .cart-item {
+      display:flex; align-items:center; gap:14px;
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+      animation: fadeUp 0.4s ease both;
+      transition: background 0.2s;
+    }
+    .cart-item:last-child { border-bottom:none; }
+    .cart-item:hover { background:var(--bg2); }
+    @keyframes fadeUp {
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .item-img {
+      width:64px; height:64px; border-radius:12px;
+      object-fit:cover; flex-shrink:0;
+    }
+    .item-info { flex:1; min-width:0; }
+    .item-info h4 {
+      font-family:'Playfair Display',serif;
+      font-size:15px; font-weight:700; color:var(--text);
+      margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .item-info .item-price { font-size:13px; color:var(--accent); font-weight:600; }
+    .item-controls { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .qty-btn {
+      width:28px; height:28px; border-radius:7px;
+      border:1.5px solid var(--border);
+      background:var(--bg2); color:var(--text);
+      font-size:15px; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition: background 0.2s;
+      font-family:'Poppins',sans-serif;
+    }
+    .qty-btn:hover { background:var(--gold); border-color:var(--gold); color:#fff; }
+    .qty-num { font-size:14px; font-weight:600; min-width:20px; text-align:center; }
+    .item-total { font-size:14px; font-weight:600; color:var(--text); min-width:72px; text-align:right; }
+    .delete-btn {
+      width:28px; height:28px; border-radius:7px;
+      border:1.5px solid var(--border);
+      background:transparent; color:var(--sub);
+      font-size:14px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .delete-btn:hover { background:#FFEBEE; color:var(--accent); border-color:var(--accent); }
+
+    /* SUMMARY BOX */
+    .summary-box {
+      background:var(--card);
+      border-radius:20px;
+      border:1px solid var(--border);
+      box-shadow:0 4px 24px var(--shadow);
+      padding:24px;
+      position:sticky; top:88px;
+    }
+
+    /* TABLE SELECTION */
+    .table-section { margin-bottom:24px; }
+    .table-label {
+      font-size:13px; font-weight:600; color:var(--text);
+      margin-bottom:12px; display:flex; align-items:center; gap:6px;
+    }
+    .table-label .req { color:var(--accent); font-size:12px; }
+    .table-grid {
+      display:grid; grid-template-columns:repeat(5,1fr); gap:8px;
+    }
+    .table-btn {
+      aspect-ratio:1; border-radius:10px;
+      border:2px solid var(--border);
+      background:var(--bg2); color:var(--sub);
+      font-size:13px; font-weight:600;
+      cursor:pointer; transition:all 0.2s;
+      font-family:'Poppins',sans-serif;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .table-btn:hover { border-color:var(--gold); color:var(--gold); }
+    .table-btn.selected {
+      background:var(--accent); border-color:var(--accent);
+      color:#fff; transform:scale(1.08);
+      box-shadow:0 4px 14px rgba(198,40,40,0.35);
+    }
+    .table-btn.occupied {
+      background:var(--bg); color:var(--border);
+      cursor:not-allowed; opacity:0.5;
+      text-decoration:line-through;
+    }
+    .table-legend {
+      display:flex; gap:14px; margin-top:10px; flex-wrap:wrap;
+    }
+    .legend-item {
+      display:flex; align-items:center; gap:5px;
+      font-size:11px; color:var(--sub);
+    }
+    .legend-dot {
+      width:10px; height:10px; border-radius:3px;
+    }
+    .dot-avail { background:var(--bg2); border:1.5px solid var(--border); }
+    .dot-sel { background:var(--accent); }
+    .dot-occ { background:var(--bg); border:1.5px solid var(--border); opacity:0.4; }
+
+    /* CATATAN */
+    .note-section { margin-bottom:20px; }
+    .note-section label {
+      font-size:13px; font-weight:600; color:var(--text);
+      display:block; margin-bottom:8px;
+    }
+    .note-section textarea {
+      width:100%; border-radius:10px;
+      border:1.5px solid var(--border);
+      background:var(--bg2); color:var(--text);
+      padding:10px 12px; font-size:13px;
+      font-family:'Poppins',sans-serif;
+      resize:none; outline:none;
+      transition: border-color 0.2s;
+    }
+    .note-section textarea:focus { border-color:var(--gold); }
+
+    /* RINCIAN BIAYA */
+    .billing { margin-bottom:20px; }
+    .billing-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:7px 0; font-size:13px; color:var(--sub);
+      border-bottom:1px dashed var(--border);
+    }
+    .billing-row:last-of-type { border-bottom:none; }
+    .billing-row.total {
+      font-size:16px; font-weight:700; color:var(--text);
+      border-top:2px solid var(--border);
+      padding-top:12px; margin-top:4px;
+    }
+    .billing-row.total .val { color:var(--accent); font-family:'Playfair Display',serif; font-size:18px; }
+    .billing-row .val { font-weight:600; color:var(--text); }
+
+    /* ORDER BTN */
+    .order-btn {
+      width:100%; padding:14px;
+      border:none; border-radius:14px;
+      background:linear-gradient(135deg, var(--accent), #E53935);
+      color:#fff; font-size:15px; font-weight:700;
+      cursor:pointer; font-family:'Poppins',sans-serif;
+      letter-spacing:0.3px;
+      transition:opacity 0.2s, transform 0.15s;
+      box-shadow:0 6px 20px rgba(198,40,40,0.30);
+    }
+    .order-btn:hover { opacity:0.88; }
+    .order-btn:active { transform:scale(0.97); }
+    .order-btn:disabled {
+      background:#ccc; cursor:not-allowed;
+      box-shadow:none; opacity:1;
+    }
+
+    /* BACK LINK */
+    .back-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      color:var(--sub); font-size:13px; cursor:pointer;
+      margin-bottom:18px; transition:color 0.2s;
+    }
+    .back-btn:hover { color:var(--accent); }
+
+    /* MODAL SUKSES */
+    .modal-overlay {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.55); z-index:200;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity 0.3s;
+    }
+    .modal-overlay.show { opacity:1; pointer-events:all; }
+    .modal {
+      background:var(--card); border-radius:24px;
+      padding:36px 32px; text-align:center;
+      max-width:360px; width:90%;
+      box-shadow:0 20px 60px rgba(0,0,0,0.25);
+      transform:scale(0.88); transition:transform 0.3s;
+      border:1px solid var(--border);
+    }
+    .modal-overlay.show .modal { transform:scale(1); }
+    .modal .icon-big { font-size:64px; margin-bottom:14px; }
+    .modal h3 {
+      font-family:'Playfair Display',serif;
+      font-size:24px; font-weight:900; color:var(--text);
+      margin-bottom:8px;
+    }
+    .modal p { color:var(--sub); font-size:13px; line-height:1.7; margin-bottom:6px; }
+    .modal .order-id {
+      background:var(--bg2); border-radius:10px;
+      padding:10px 16px; font-size:13px; font-weight:600;
+      color:var(--accent); margin:14px 0;
+      border:1px solid var(--border);
+    }
+    .modal-btn {
+      display:inline-block; padding:11px 28px;
+      background:var(--accent); color:#fff;
+      border-radius:12px; font-size:14px; font-weight:600;
+      cursor:pointer; margin-top:6px;
+      font-family:'Poppins',sans-serif;
+      border:none; transition:opacity 0.2s;
+    }
+    .modal-btn:hover { opacity:0.85; }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#1A1007; color:#fff; padding:11px 22px;
+      border-radius:12px; font-size:13px; font-weight:500;
+      opacity:0; transition:all 0.3s; z-index:300;
+      pointer-events:none; white-space:nowrap;
+      border-left:4px solid var(--gold);
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    footer {
+      text-align:center; padding:26px; color:var(--sub);
+      font-size:13px; border-top:1px solid var(--border);
+    }
+
+    @media(max-width:768px){
+      nav { padding:14px 20px; }
+      .container { grid-template-columns:1fr; padding:24px 16px 48px; }
+      .summary-box { position:static; }
+      .page-header { padding:32px 20px 24px; }
+      .page-header h2 { font-size:28px; }
+    }
+  </style>
+</head>
+<body id="body">
+
+  <nav>
+    <h1 onclick="window.location.href='index.html'">🍜 Bakmi Ayam</h1>
+    <ul>
+      <li onclick="window.location.href='index.html'">Home</li>
+      <li onclick="window.location.href='menu.html'">Menu</li>
+      <li class="active">Keranjang</li>
+    </ul>
+    <div class="nav-right">
+      <div class="toggle" onclick="toggleDark()">🌙</div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <span class="label">✦ Ringkasan Pesanan ✦</span>
+    <h2>Keranjang Saya</h2>
+    <p>Periksa pesanan Anda, pilih meja, lalu konfirmasi.</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- LEFT: CART ITEMS -->
+    <div>
+      <p class="back-btn" onclick="window.location.href='menu.html'">← Tambah Menu Lagi</p>
+      <div class="section-title">
+        Item Pesanan <span id="itemCount">0</span>
+      </div>
+      <div class="cart-box" id="cartBox">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- RIGHT: SUMMARY -->
+    <div>
+      <div class="summary-box">
+
+        <!-- TABLE SELECTION -->
+        <div class="table-section">
+          <div class="table-label">
+            🪑 Pilih Nomor Meja <span class="req">* Wajib</span>
+          </div>
+          <div class="table-grid" id="tableGrid">
+            <!-- rendered by JS -->
+          </div>
+          <div class="table-legend">
+            <div class="legend-item"><div class="legend-dot dot-avail"></div> Tersedia</div>
+            <div class="legend-item"><div class="legend-dot dot-sel"></div> Dipilih</div>
+            <div class="legend-item"><div class="legend-dot dot-occ"></div> Terisi</div>
+          </div>
+          <div id="tableInfo" style="font-size:12px;color:var(--sub);margin-top:8px;min-height:16px;"></div>
+        </div>
+
+        <!-- CATATAN -->
+        <div class="note-section">
+          <label>📝 Catatan (opsional)</label>
+          <textarea id="noteInput" rows="2" placeholder="Contoh: tanpa bawang, kuah terpisah..."></textarea>
+        </div>
+
+        <!-- RINCIAN BIAYA -->
+        <div class="section-title" style="font-size:16px;margin-bottom:14px;">Rincian Biaya</div>
+        <div class="billing">
+          <div class="billing-row">
+            <span>Subtotal</span>
+            <span class="val" id="subtotal">Rp 0</span>
+          </div>
+          <div class="billing-row">
+            <span>Pajak (10%)</span>
+            <span class="val" id="tax">Rp 0</span>
+          </div>
+          <div class="billing-row">
+            <span>Biaya Layanan</span>
+            <span class="val">Rp 2.000</span>
+          </div>
+          <div class="billing-row">
+            <span>No. Meja</span>
+            <span class="val" id="tableDisplay">—</span>
+          </div>
+          <div class="billing-row total">
+            <span>Total</span>
+            <span class="val" id="grandTotal">Rp 0</span>
+          </div>
+        </div>
+
+        <button class="order-btn" id="orderBtn" onclick="placeOrder()" disabled>
+          Pesan Sekarang
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2026 Bakmi Ayam &nbsp;·&nbsp; Dibuat dengan ❤️</footer>
+
+  <!-- MODAL SUKSES -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="icon-big">🎉</div>
+      <h3>Pesanan Diterima!</h3>
+      <p>Pesanan Anda sedang diproses oleh dapur kami.</p>
+      <div class="order-id" id="orderIdBox"></div>
+      <p id="modalTableInfo" style="font-size:13px;color:var(--sub);"></p>
+      <button class="modal-btn" onclick="closeModal()">Kembali ke Menu</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const menuData = [
+      { id:1,  name:"Mie/Kwetiaw/Bihun",                              price:26000, img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=100&q=70" },
+      { id:2,  name:"Mie/Kwetiaw/Bihun +2 Topping",                   price:31000, img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?w=100&q=70" },
+      { id:3,  name:"Mie/Kwetiaw/Bihun +4 Topping",                   price:36000, img:"https://images.unsplash.com/photo-1557872943-16a5ac26437e?w=100&q=70" },
+      { id:4,  name:"Mie/Kwetiaw/Bihun Komplit +5 Topping",           price:39000, img:"https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=100&q=70" },
+      { id:5,  name:"Mie/Bihun (Setengah)",                           price:18000, img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100&q=70" },
+      { id:6,  name:"Mie/Bihun +2 Topping (Setengah)",                price:23000, img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=100&q=70" },
+      { id:7,  name:"Mie/Bihun +4 Topping (Setengah)",                price:28000, img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?w=100&q=70" },
+      { id:8,  name:"Mie/Bihun Komplit +5 Topping (Setengah)",        price:31000, img:"https://images.unsplash.com/photo-1557872943-16a5ac26437e?w=100&q=70" },
+      { id:9,  name:"Mie/Kwetiaw/Bihun Jumbo",                        price:37000, img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100&q=70" },
+      { id:10, name:"Mie/Kwetiaw/Bihun Jumbo +2 Topping",             price:42000, img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=100&q=70" },
+      { id:11, name:"Mie/Kwetiaw/Bihun Jumbo +4 Topping",             price:47000, img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?w=100&q=70" },
+      { id:12, name:"Mie/Kwetiaw/Bihun Jumbo Komplit +5 Topping",     price:50000, img:"https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=100&q=70" },
+      { id:13, name:"Tahu Kok Isi 10",                                 price:30000, img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=100&q=70" },
+      { id:14, name:"Tahu Kok Isi 5",                                  price:17000, img:"https://images.unsplash.com/photo-1547592180-85f173990554?w=100&q=70" },
+      { id:15, name:"Pangsit Kuah/Bakso Sapi/Bakso Ikan Isi 10",      price:30000, img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=100&q=70" },
+      { id:16, name:"Pangsit Kuah/Bakso Sapi/Bakso Ikan Isi 5",       price:17000, img:"https://images.unsplash.com/photo-1547592180-85f173990554?w=100&q=70" },
+      { id:17, name:"Pempek Lenjer/Kapal Selam",                       price:25000, img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=100&q=70" },
+      { id:18, name:"Nasi Tim Ayam",                                   price:25000, img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=100&q=70" },
+      { id:19, name:"Nasi Putih 1 Porsi",                              price:7000,  img:"https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=100&q=70" },
+      { id:20, name:"Nasi Putih ½ Porsi",                              price:4000,  img:"https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=100&q=70" },
+      { id:21, name:"Extra Ayam",                                      price:6000,  img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=100&q=70" },
+      { id:22, name:"Extra Sayur Porsi Besar",                         price:10000, img:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&q=70" },
+      { id:23, name:"Extra Sayur Porsi Kecil",                         price:6000,  img:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&q=70" },
+      { id:24, name:"Extra Sambal Tauco 3 pcs",                        price:5000,  img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=100&q=70" },
+    ];
+
+    const SERVICE_FEE = 2000;
+    const TAX_RATE = 0.10;
+    const TOTAL_TABLES = 15;
+    const OCCUPIED = [3, 7, 11]; // meja yang sudah terisi
+
+    let cart = JSON.parse(localStorage.getItem('cart') || '{}');
+    let selectedTable = null;
+
+    function fmt(n) { return 'Rp ' + n.toLocaleString('id-ID'); }
+
+    /* ─── RENDER CART ─── */
+    function renderCart() {
+      const box = document.getElementById('cartBox');
+      const items = menuData.filter(m => cart[m.id] > 0);
+
+      if (items.length === 0) {
+        box.innerHTML = `
+          <div class="cart-empty">
+            <div class="icon">🛒</div>
+            <p>Keranjang masih kosong.<br>Yuk tambahkan menu favoritmu!</p>
+            <a onclick="window.location.href='menu.html'">Lihat Menu</a>
+          </div>`;
+        document.getElementById('itemCount').textContent = '0';
+        updateBilling();
+        return;
+      }
+
+      box.innerHTML = items.map((m, i) => `
+        <div class="cart-item" style="animation-delay:${i*0.07}s">
+          <img class="item-img" src="${m.img}" alt="${m.name}">
+          <div class="item-info">
+            <h4>${m.name}</h4>
+            <div class="item-price">${fmt(m.price)} / porsi</div>
+          </div>
+          <div class="item-controls">
+            <button class="qty-btn" onclick="changeQty(${m.id},-1)">−</button>
+            <span class="qty-num">${cart[m.id]}</span>
+            <button class="qty-btn" onclick="changeQty(${m.id},1)">+</button>
+          </div>
+          <div class="item-total">${fmt(m.price * cart[m.id])}</div>
+          <button class="delete-btn" onclick="removeItem(${m.id})" title="Hapus">✕</button>
+        </div>
+      `).join('');
+
+      const totalItems = Object.values(cart).reduce((a,b)=>a+b,0);
+      document.getElementById('itemCount').textContent = totalItems;
+      updateBilling();
+    }
+
+    function changeQty(id, delta) {
+      cart[id] = Math.max(0, (cart[id]||0) + delta);
+      if (cart[id] === 0) delete cart[id];
+      localStorage.setItem('cart', JSON.stringify(cart));
+      renderCart();
+    }
+
+    function removeItem(id) {
+      delete cart[id];
+      localStorage.setItem('cart', JSON.stringify(cart));
+      renderCart();
+      showToast('Item dihapus dari keranjang');
+    }
+
+    /* ─── BILLING ─── */
+    function updateBilling() {
+      const items = menuData.filter(m => cart[m.id] > 0);
+      const subtotal = items.reduce((sum, m) => sum + m.price * cart[m.id], 0);
+      const tax = Math.round(subtotal * TAX_RATE);
+      const grand = subtotal + tax + SERVICE_FEE;
+
+      document.getElementById('subtotal').textContent = fmt(subtotal);
+      document.getElementById('tax').textContent = fmt(tax);
+      document.getElementById('grandTotal').textContent = fmt(grand);
+
+      // Enable order btn only if cart not empty AND table selected
+      const hasItems = items.length > 0;
+      document.getElementById('orderBtn').disabled = !(hasItems && selectedTable);
+    }
+
+    /* ─── TABLE GRID ─── */
+    function renderTables() {
+      const grid = document.getElementById('tableGrid');
+      grid.innerHTML = '';
+      for (let i = 1; i <= TOTAL_TABLES; i++) {
+        const isOccupied = OCCUPIED.includes(i);
+        const isSelected = selectedTable === i;
+        const cls = isOccupied ? 'occupied' : isSelected ? 'selected' : '';
+        grid.innerHTML += `
+          <button class="table-btn ${cls}"
+            onclick="${isOccupied ? '' : `selectTable(${i})`}"
+            title="Meja ${i}${isOccupied?' (Terisi)':''}">
+            ${i}
+          </button>`;
+      }
+    }
+
+    function selectTable(n) {
+      selectedTable = selectedTable === n ? null : n;
+      renderTables();
+      const info = document.getElementById('tableInfo');
+      const disp = document.getElementById('tableDisplay');
+      if (selectedTable) {
+        info.textContent = `✓ Meja ${selectedTable} dipilih`;
+        info.style.color = 'var(--green)';
+        disp.textContent = `Meja ${selectedTable}`;
+      } else {
+        info.textContent = '';
+        disp.textContent = '—';
+      }
+      updateBilling();
+    }
+
+    /* ─── ORDER ─── */
+    function placeOrder() {
+      if (!selectedTable) { showToast('⚠️ Pilih nomor meja terlebih dahulu'); return; }
+      const items = menuData.filter(m => cart[m.id] > 0);
+      if (items.length === 0) { showToast('Keranjang masih kosong'); return; }
+
+      const orderId = 'BA-' + Date.now().toString().slice(-6);
+      document.getElementById('orderIdBox').textContent = `No. Pesanan: ${orderId}`;
+      document.getElementById('modalTableInfo').textContent =
+        `Meja ${selectedTable} · ${items.length} menu · ${fmt(calcGrand())}`;
+
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    function calcGrand() {
+      const items = menuData.filter(m => cart[m.id] > 0);
+      const sub = items.reduce((s,m)=>s+m.price*cart[m.id],0);
+      return sub + Math.round(sub*TAX_RATE) + SERVICE_FEE;
+    }
+
+    function closeModal() {
+      // Reset
+      cart = {};
+      localStorage.setItem('cart', JSON.stringify(cart));
+      selectedTable = null;
+      document.getElementById('modalOverlay').classList.remove('show');
+      window.location.href = 'menu.html';
+    }
+
+    /* ─── TOAST ─── */
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'), 2200);
+    }
+
+    /* ─── DARK MODE ─── */
+    function toggleDark() {
+      document.getElementById('body').classList.toggle('dark');
+      localStorage.setItem('darkMode', document.getElementById('body').classList.contains('dark'));
+    }
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.getElementById('body').classList.add('dark');
+    }
+
+    /* ─── INIT ─── */
+    renderCart();
+    renderTables();
+  </script>
+</body>
+</html>

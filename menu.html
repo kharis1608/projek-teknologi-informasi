@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu — Bakmi Ayam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --bg2: #F2EDE6;
+      --card: #FFFFFF;
+      --nav: #FFFFFF;
+      --text: #1A1007;
+      --sub: #6B5B4E;
+      --accent: #C62828;
+      --gold: #E8A000;
+      --border: rgba(200,170,130,0.25);
+      --shadow: rgba(80,40,10,0.10);
+    }
+    .dark {
+      --bg: #100B07;
+      --bg2: #1A120A;
+      --card: #1E1610;
+      --nav: #1E1610;
+      --text: #F5ECD8;
+      --sub: #B09080;
+      --border: rgba(200,150,80,0.15);
+      --shadow: rgba(0,0,0,0.35);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Poppins',sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 18px 40px;
+      background: var(--nav);
+      box-shadow: 0 2px 20px var(--shadow);
+      position: sticky; top:0; z-index:100;
+      border-bottom: 2px solid var(--gold);
+      transition: background 0.3s;
+    }
+    nav h1 {
+      font-family:'Playfair Display',serif;
+      font-size:22px; font-weight:900;
+      color: var(--accent);
+      cursor: pointer;
+    }
+    nav ul { display:flex; gap:28px; list-style:none; }
+    nav ul li {
+      font-size:14px; font-weight:500; color:var(--sub);
+      cursor:pointer; padding:4px 0;
+      position:relative; letter-spacing:0.3px;
+      transition: color 0.2s;
+    }
+    nav ul li::after {
+      content:''; position:absolute; bottom:-2px; left:0;
+      width:0; height:2px; background:var(--gold);
+      transition: width 0.25s;
+    }
+    nav ul li:hover { color:var(--accent); }
+    nav ul li:hover::after { width:100%; }
+    nav ul li.active { color:var(--accent); }
+    nav ul li.active::after { width:100%; }
+
+    .nav-right { display:flex; align-items:center; gap:8px; }
+    .toggle {
+      cursor:pointer; padding:7px 13px; border-radius:8px;
+      background:var(--bg2); font-size:15px;
+      border:1px solid var(--border);
+      transition: background 0.3s;
+    }
+    .cart-icon { position:relative; cursor:pointer; font-size:20px; }
+    .cart-count {
+      position:absolute; top:-8px; right:-8px;
+      background:var(--accent); color:#fff;
+      font-size:10px; font-weight:700; width:18px; height:18px;
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+    }
+    .cart-count.bump { animation: bump 0.3s ease; }
+    @keyframes bump { 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} }
+
+    /* PAGE HEADER */
+    .page-header {
+      background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+      padding: 48px 40px 36px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse at 60% 40%, rgba(232,160,0,0.08) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .page-header .label {
+      display:inline-block;
+      font-size:11px; letter-spacing:3px; text-transform:uppercase;
+      color: var(--gold); font-weight:600; margin-bottom:10px;
+    }
+    .page-header h2 {
+      font-family:'Playfair Display',serif;
+      font-size:40px; font-weight:900; color:var(--text);
+      line-height:1.1; margin-bottom:12px;
+    }
+    .page-header p {
+      color:var(--sub); font-size:14px; max-width:420px; margin:0 auto 20px;
+      line-height:1.7;
+    }
+    .divider {
+      width:60px; height:3px;
+      background:linear-gradient(90deg,var(--gold),var(--accent));
+      border-radius:3px; margin:0 auto;
+    }
+
+    /* FILTER TABS */
+    .filters {
+      display:flex; gap:10px; justify-content:center;
+      padding: 28px 40px 0; flex-wrap:wrap;
+    }
+    .filter-btn {
+      padding: 8px 20px; border-radius:50px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--sub); font-size:13px; font-weight:500;
+      cursor:pointer; transition:all 0.2s;
+      font-family:'Poppins',sans-serif;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent); color:#fff; border-color:var(--accent);
+    }
+
+    /* MENU GRID */
+    .menu { padding: 32px 40px 60px; max-width:1200px; margin:0 auto; }
+    .menu-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap:28px;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--card);
+      border-radius: 20px; overflow:hidden;
+      box-shadow: 0 4px 24px var(--shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.25s, box-shadow 0.25s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px var(--shadow); }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .card:nth-child(1){animation-delay:0.05s}
+    .card:nth-child(2){animation-delay:0.12s}
+    .card:nth-child(3){animation-delay:0.19s}
+    .card:nth-child(4){animation-delay:0.26s}
+    .card:nth-child(5){animation-delay:0.33s}
+    .card:nth-child(6){animation-delay:0.40s}
+
+    .card-img-wrap { position:relative; height:200px; overflow:hidden; }
+    .card-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s; }
+    .card:hover .card-img-wrap img { transform:scale(1.06); }
+
+    .badge {
+      position:absolute; top:12px; left:12px;
+      background:var(--accent); color:#fff;
+      font-size:10px; font-weight:700;
+      padding:3px 10px; border-radius:20px;
+      letter-spacing:0.5px; text-transform:uppercase;
+    }
+    .badge.best { background:var(--gold); color:#1A1007; }
+
+    .card-body { padding:16px 18px 18px; }
+    .card-body h3 {
+      font-family:'Playfair Display',serif;
+      font-size:17px; font-weight:700; color:var(--text);
+      margin-bottom:5px;
+    }
+    .card-body .desc {
+      font-size:12px; color:var(--sub); line-height:1.6; margin-bottom:12px;
+    }
+    .card-footer {
+      display:flex; align-items:center; justify-content:space-between; margin-top:4px;
+    }
+    .price {
+      font-size:16px; font-weight:700; color:var(--accent);
+      font-family:'Playfair Display',serif;
+    }
+    .price span { font-size:11px; font-weight:400; color:var(--sub); font-family:'Poppins',sans-serif; }
+
+    .qty-wrap { display:flex; align-items:center; gap:6px; }
+    .qty-btn {
+      width:30px; height:30px; border-radius:8px;
+      border:1.5px solid var(--border);
+      background:var(--bg2); color:var(--text);
+      font-size:16px; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background 0.2s, border-color 0.2s;
+      font-family:'Poppins',sans-serif;
+    }
+    .qty-btn:hover { background:var(--gold); border-color:var(--gold); color:#fff; }
+    .qty-num { font-size:14px; font-weight:600; min-width:18px; text-align:center; }
+
+    .add-btn {
+      width:100%; padding:10px;
+      border:none; border-radius:12px;
+      background: linear-gradient(135deg, var(--accent), #E53935);
+      color:#fff; font-size:13px; font-weight:600;
+      cursor:pointer; margin-top:14px;
+      font-family:'Poppins',sans-serif; letter-spacing:0.3px;
+      transition:opacity 0.2s, transform 0.1s;
+    }
+    .add-btn:hover { opacity:0.88; }
+    .add-btn:active { transform:scale(0.97); }
+    .add-btn.added { background:linear-gradient(135deg, var(--gold), #F5B800); color:#1A1007; }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#1A1007; color:#fff; padding:12px 24px;
+      border-radius:12px; font-size:13px; font-weight:500;
+      opacity:0; transition:all 0.3s; z-index:999;
+      pointer-events:none; white-space:nowrap;
+      border-left:4px solid var(--gold);
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* BACK BTN */
+    .back-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      color:var(--sub); font-size:13px; cursor:pointer;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color:var(--accent); }
+
+    footer {
+      text-align:center; padding:28px; color:var(--sub);
+      font-size:13px; border-top:1px solid var(--border);
+    }
+
+    @media(max-width:600px){
+      nav { padding:14px 20px; }
+      nav ul { gap:16px; }
+      .page-header { padding:36px 20px 28px; }
+      .page-header h2 { font-size:28px; }
+      .menu { padding:24px 16px 48px; }
+      .filters { padding:20px 16px 0; }
+    }
+  </style>
+</head>
+<body id="body">
+
+  <nav>
+    <h1 onclick="window.location.href='index.html'">🍜 Bakmi Ayam</h1>
+    <ul>
+      <li onclick="window.location.href='index.html'">Home</li>
+      <li class="active">Menu</li>
+
+    </ul>
+    <div class="nav-right">
+      <div class="cart-icon" onclick="window.location.href='keranjang.html'">
+        🛒<div class="cart-count" id="cartCount">0</div>
+      </div>
+      <div class="toggle" onclick="toggleDark()">🌙</div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="label">✦ Pilihan Terbaik Kami ✦</div>
+    <h2>Menu Lengkap</h2>
+    <p>Temukan hidangan favorit Anda — dari bakmi klasik hingga pilihan spesial dengan topping melimpah.</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filter('semua',this)">Semua</button>
+    <button class="filter-btn" onclick="filter('porsi-normal',this)">Porsi Normal</button>
+    <button class="filter-btn" onclick="filter('porsi-setengah',this)">Porsi Setengah</button>
+    <button class="filter-btn" onclick="filter('porsi-jumbo',this)">Porsi Jumbo</button>
+    <button class="filter-btn" onclick="filter('soup',this)">Soup</button>
+    <button class="filter-btn" onclick="filter('lain',this)">Lain-lain</button>
+    <button class="filter-btn" onclick="filter('extra',this)">Extra</button>
+  </div>
+
+  <section class="menu">
+    <p class="back-btn" onclick="window.location.href='index.html'">← Kembali ke Home</p>
+    <div class="menu-grid" id="menuGrid"></div>
+  </section>
+
+  <footer>© 2026 Bakmi Ayam &nbsp;·&nbsp; Dibuat dengan ❤️</footer>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const menuData = [
+      // ── PORSI NORMAL ──
+      { id:1,  name:"Mie/Kwetiaw/Bihun",           cat:"porsi-normal",   price:26000, badge:"",           badgeClass:"",
+        desc:"Pilihan mie, kwetiaw, atau bihun dengan kuah ayam gurih dan topping pilihan.",
+        img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80" },
+      { id:2,  name:"Mie/Kwetiaw/Bihun +2 Topping", cat:"porsi-normal",  price:31000, badge:"Populer",    badgeClass:"",
+        desc:"Tambah 2 topping favoritmu: pangsit, bakso sapi, bakso ikan, fukian, atau tahu.",
+        img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80" },
+      { id:3,  name:"Mie/Kwetiaw/Bihun +4 Topping", cat:"porsi-normal",  price:36000, badge:"",           badgeClass:"",
+        desc:"Lengkapi mangkukmu dengan 4 topping pilihan dari koleksi terbaik kami.",
+        img:"https://images.unsplash.com/photo-1557872943-16a5ac26437e?w=400&q=80" },
+      { id:4,  name:"Mie/Kwetiaw/Bihun Komplit +5 Topping", cat:"porsi-normal", price:39000, badge:"Best Seller", badgeClass:"best",
+        desc:"Porsi normal komplit dengan 5 topping! Boleh campur sesuka hati.",
+        img:"https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=400&q=80" },
+
+      // ── PORSI SETENGAH ──
+      { id:5,  name:"Mie/Bihun (Setengah)",          cat:"porsi-setengah", price:18000, badge:"",          badgeClass:"",
+        desc:"Porsi setengah cocok untuk makan siang ringan. Catatan: kwetiaw tidak tersedia porsi ½.",
+        img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&q=80" },
+      { id:6,  name:"Mie/Bihun +2 Topping (Setengah)", cat:"porsi-setengah", price:23000, badge:"",        badgeClass:"",
+        desc:"Porsi setengah dengan 2 topping pilihanmu.",
+        img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80" },
+      { id:7,  name:"Mie/Bihun +4 Topping (Setengah)", cat:"porsi-setengah", price:28000, badge:"",        badgeClass:"",
+        desc:"Porsi setengah dengan 4 topping. Makin lengkap, makin nikmat!",
+        img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80" },
+      { id:8,  name:"Mie/Bihun Komplit +5 Topping (Setengah)", cat:"porsi-setengah", price:31000, badge:"", badgeClass:"",
+        desc:"Porsi setengah komplit 5 topping. Boleh campur atau 1 macam saja.",
+        img:"https://images.unsplash.com/photo-1557872943-16a5ac26437e?w=400&q=80" },
+
+      // ── PORSI JUMBO ──
+      { id:9,  name:"Mie/Kwetiaw/Bihun Jumbo",       cat:"porsi-jumbo",   price:37000, badge:"",           badgeClass:"",
+        desc:"Porsi jumbo (1,5x) untuk selera besar. Kuah kaldu ayam yang kaya rasa.",
+        img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&q=80" },
+      { id:10, name:"Mie/Kwetiaw/Bihun Jumbo +2 Topping", cat:"porsi-jumbo", price:42000, badge:"",        badgeClass:"",
+        desc:"Porsi jumbo ditambah 2 topping pilihan. Cocok untuk yang ekstra lapar!",
+        img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80" },
+      { id:11, name:"Mie/Kwetiaw/Bihun Jumbo +4 Topping", cat:"porsi-jumbo", price:47000, badge:"",        badgeClass:"",
+        desc:"Porsi jumbo dengan 4 topping. Sajian super mengenyangkan!",
+        img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&q=80" },
+      { id:12, name:"Mie/Kwetiaw/Bihun Jumbo Komplit +5 Topping", cat:"porsi-jumbo", price:50000, badge:"Favorit", badgeClass:"",
+        desc:"Porsi jumbo komplit 5 topping — menu terlengkap dan paling mengenyangkan!",
+        img:"https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=400&q=80" },
+
+      // ── SOUP ──
+      { id:13, name:"Tahu Kok Isi 10 (Tahu, Fukian, Bakso Ikan)", cat:"soup", price:30000, badge:"",       badgeClass:"",
+        desc:"Sup tahu kok isi 10 pcs dengan pilihan tahu, fukian, dan bakso ikan.",
+        img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&q=80" },
+      { id:14, name:"Tahu Kok Isi 5 (Tahu, Fukian, Bakso Ikan)",  cat:"soup", price:17000, badge:"",       badgeClass:"",
+        desc:"Sup tahu kok isi 5 pcs. Boleh campur atau 1 macam saja.",
+        img:"https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80" },
+      { id:15, name:"Pangsit Kuah/Bakso Sapi/Bakso Ikan Isi 10",  cat:"soup", price:30000, badge:"",       badgeClass:"",
+        desc:"Pangsit kuah, bakso sapi, atau bakso ikan isi 10 pcs. Segar dan kenyal!",
+        img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&q=80" },
+      { id:16, name:"Pangsit Kuah/Bakso Sapi/Bakso Ikan Isi 5",   cat:"soup", price:17000, badge:"",       badgeClass:"",
+        desc:"Pangsit kuah, bakso sapi, atau bakso ikan isi 5 pcs. Boleh campur.",
+        img:"https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80" },
+
+      // ── LAIN-LAIN ──
+      { id:17, name:"Pempek Lenjer/Kapal Selam",     cat:"lain",          price:25000, badge:"",           badgeClass:"",
+        desc:"Pempek khas Palembang — lenjer atau kapal selam, disajikan dengan cuka pedas.",
+        img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" },
+      { id:18, name:"Nasi Tim Ayam",                 cat:"lain",          price:25000, badge:"",           badgeClass:"",
+        desc:"Nasi tim ayam lembut dengan kuah kaldu, telur asin, dan jamur.",
+        img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&q=80" },
+      { id:19, name:"Nasi Putih 1 Porsi",            cat:"lain",          price:7000,  badge:"",           badgeClass:"",
+        desc:"Nasi putih pulen 1 porsi, pelengkap sempurna untuk semua menu.",
+        img:"https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&q=80" },
+      { id:20, name:"Nasi Putih ½ Porsi",            cat:"lain",          price:4000,  badge:"",           badgeClass:"",
+        desc:"Nasi putih ½ porsi untuk yang ingin makan secukupnya.",
+        img:"https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&q=80" },
+
+      // ── EXTRA ──
+      { id:21, name:"Extra Ayam",                    cat:"extra",         price:6000,  badge:"",           badgeClass:"",
+        desc:"Tambahan ayam cincang berbumbu untuk melengkapi mangkukmu.",
+        img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80" },
+      { id:22, name:"Extra Sayur Porsi Besar",        cat:"extra",         price:10000, badge:"",           badgeClass:"",
+        desc:"Tambahan sayur segar porsi besar — lebih sehat, lebih nikmat.",
+        img:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80" },
+      { id:23, name:"Extra Sayur Porsi Kecil",        cat:"extra",         price:6000,  badge:"",           badgeClass:"",
+        desc:"Tambahan sayur segar porsi kecil.",
+        img:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80" },
+      { id:24, name:"Extra Sambal Tauco 3 pcs",       cat:"extra",         price:5000,  badge:"",           badgeClass:"",
+        desc:"Sambal tauco khas kami, pedas dan gurih. 3 pcs per porsi.",
+        img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" },
+    ];
+
+    // Ambil cart dari localStorage agar sinkron antar halaman
+    let cart = JSON.parse(localStorage.getItem('cart') || '{}');
+
+    function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+    function fmt(n) { return 'Rp ' + n.toLocaleString('id-ID'); }
+
+    function renderMenu(items) {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = '';
+      items.forEach(item => {
+        const qty = cart[item.id] || 0;
+        grid.innerHTML += `
+        <div class="card" data-cat="${item.cat}">
+          <div class="card-img-wrap">
+            <img src="${item.img}" alt="${item.name}" loading="lazy">
+            ${item.badge ? `<div class="badge ${item.badgeClass}">${item.badge}</div>` : ''}
+          </div>
+          <div class="card-body">
+            <h3>${item.name}</h3>
+            <p class="desc">${item.desc}</p>
+            <div class="card-footer">
+              <div class="price">${fmt(item.price)}<br><span>/porsi</span></div>
+              <div class="qty-wrap">
+                <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+                <span class="qty-num" id="qty-${item.id}">${qty}</span>
+                <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+              </div>
+            </div>
+            <button class="add-btn ${qty > 0 ? 'added' : ''}" id="btn-${item.id}" onclick="addToCart(${item.id})">
+              ${qty > 0 ? '✓ Ditambahkan (' + qty + ')' : '🛒 Tambah ke Keranjang'}
+            </button>
+          </div>
+        </div>`;
+      });
+    }
+
+    function filter(cat, el) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      const filtered = cat === 'semua' ? menuData : menuData.filter(m => m.cat === cat);
+      renderMenu(filtered);
+      syncButtons();
+    }
+
+    function addToCart(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      saveCart();
+      updateCartUI(id);
+      showToast('✓ ' + menuData.find(m => m.id === id).name + ' ditambahkan!');
+    }
+
+    function changeQty(id, delta) {
+      cart[id] = Math.max(0, (cart[id] || 0) + delta);
+      saveCart();
+      updateCartUI(id);
+    }
+
+    function updateCartUI(id) {
+      const qty = cart[id] || 0;
+      const qtyEl = document.getElementById('qty-' + id);
+      const btnEl = document.getElementById('btn-' + id);
+      if (qtyEl) qtyEl.textContent = qty;
+      if (btnEl) {
+        if (qty > 0) {
+          btnEl.textContent = '✓ Ditambahkan (' + qty + ')';
+          btnEl.classList.add('added');
+        } else {
+          btnEl.textContent = '🛒 Tambah ke Keranjang';
+          btnEl.classList.remove('added');
+        }
+      }
+      const total = Object.values(cart).reduce((a, b) => a + b, 0);
+      const cc = document.getElementById('cartCount');
+      cc.textContent = total;
+      cc.classList.remove('bump');
+      void cc.offsetWidth;
+      cc.classList.add('bump');
+    }
+
+    function syncButtons() {
+      Object.keys(cart).forEach(id => updateCartUI(parseInt(id)));
+      const total = Object.values(cart).reduce((a, b) => a + b, 0);
+      document.getElementById('cartCount').textContent = total;
+    }
+
+    function showCart() {
+      const total = Object.values(cart).reduce((a, b) => a + b, 0);
+      if (total === 0) { showToast('Keranjang masih kosong 🛒'); return; }
+      let lines = menuData.filter(m => cart[m.id] > 0)
+        .map(m => `${m.name} x${cart[m.id]}`).join(', ');
+      showToast('🛒 ' + lines);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function toggleDark() {
+      document.getElementById('body').classList.toggle('dark');
+      localStorage.setItem('darkMode', document.getElementById('body').classList.contains('dark'));
+    }
+
+    // Sinkronisasi dark mode dari halaman sebelumnya
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.getElementById('body').classList.add('dark');
+    }
+
+    // Init
+    renderMenu(menuData);
+    syncButtons();
+  </script>
+</body>
+</html>
